@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>免费注册</h1>
+        <h1 style="font-size:18px;font-weight:bold;margin-bottom:20px;">免费注册:</h1>
         <el-form 
         :model="ruleForm" 
         :rules="rules"
@@ -28,9 +28,6 @@
     </div>
 </template>
 <script>
-// 引入cookie
-import Cookies from 'js-cookie';
-
 export default {
   data() {
     const validatePass = (rule, value, callback) => {
@@ -39,6 +36,20 @@ export default {
         callback(new Error("两次输入密码不一致!"));
       } else {
         //   通过校验
+        callback();
+      }
+    };
+    // 验证用户名是否存在，请求数据库
+      const checkUsername = async(rule, value, callback) => {
+     
+      let {data} = await this.$axios.get('http://localhost:1907/user/check',{
+        params:{
+          username:this.ruleForm.username
+        }
+      })
+      if(data.code === 0){
+        callback(new Error("用户名已存在"));
+      }else{
         callback();
       }
     };
@@ -64,7 +75,8 @@ export default {
           { validator: validatePass, trigger: "blur" }
         ],
         username: [
-          { required: true, message: "亲，用户名必须填写哟", trigger: "blur" }
+          { required: true, message: "亲，用户名必须填写哟", trigger: "blur" },
+          { validator: checkUsername, trigger: "blur" }
         ]
       }
     };
@@ -72,24 +84,28 @@ export default {
   methods: {
     submitForm() {
       //   校验整个表单
-      this.$refs.regForm.validate(valid => {
-        // valid： 所有校验规则都通过后，得到true，只要有一个表单元素校验不通过则得到form
+      this.$refs.regForm.validate(async valid => {
+        // valid： 所有校验规则都通过后，得到true，才能发起请求
         if (valid) {
-          // alert('submit!');
           // 发起ajax请求，等待服务器返回结果
-          // 根据服务器返回结果：注册成功->跳到“登录”
-          let { username } = this.ruleForm;
-           let { password } = this.ruleForm;
-          this.$router.replace({
-            path: "/login"
-          });
-          // 存username
-          Cookies.set('name',username);
-          Cookies.set('psw',password);
-        } else {
-          return false;
-        }
-      });
+          // 根据服务器返回结果：注册成功->跳到“我的”
+      let {username,password} = this.ruleForm;
+      let {data} = await this.$axios.post('http://localhost:1907/user/reg',{
+              username,
+              password
+            });
+            console.log('data:',data);
+            if(data.code===1){
+              this.$router.replace({name:'mine',params:{username},query:{username}})
+            }else{
+              // alert('注册失败');
+              window.console.log('注册失败!!');
+            }
+          } else {
+            window.console.log('error submit!!');
+            return false;
+          }
+        });
     },
     // 重置
     resetForm(formName) {

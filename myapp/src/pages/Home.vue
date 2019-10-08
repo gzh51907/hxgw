@@ -2,7 +2,7 @@
     <div>
       <div id="lunbo">
         <!-- 轮播图 -->
-        <el-carousel height="200px">
+        <el-carousel height="180px">
             <el-carousel-item 
             v-for="item in adlist" 
             :key="item" 
@@ -22,7 +22,7 @@
         </div>
 
         <!-- 内容 -->
-        <ul class="block" 
+         <ul class="block" 
         v-for="category in recommend" 
         :key="category.title" 
         height="auto">
@@ -47,35 +47,7 @@ export default {
     return {
       adlist: [],
       recommend: [],
-      ddqGoodsList: [],
-      // 小圆图数据
-      smallpic: [
-        {
-          img:
-            "https://image.hao24.com/images_site/mob/appIndex/2019/09/1569576151928_100x100.png",
-          txt: "时尚鞋靴"
-        },
-        {
-          img:
-            "https://image.hao24.com/images_site/mob/appIndex/2019/09/1569576131137_100x100.png",
-          txt: "男人衣柜"
-        },
-        {
-          img:
-            "https://image.hao24.com/images_site/mob/appIndex/2019/09/1569576188205_100x100.png",
-          txt: "精品裤装"
-        },
-        {
-          img:
-            "https://image.hao24.com/images_site/mob/appIndex/2019/09/1569576157778_100x100.png",
-          txt: "精品套装"
-        },
-        {
-          img:
-            "https://image.hao24.com/images_site/mob/appIndex/2019/09/1569576217992_100x100.png",
-          txt: "每日签到"
-        }
-      ]
+      smallpic: []
     };
   },
   methods: {
@@ -85,22 +57,6 @@ export default {
     }
   },
   async created() {
-    // 请求数据拿商品
-    let { data: { datas } } = await this.$axios.get(
-      "https://www.nanshig.com/mobile/index.php",
-      {
-        params: {
-          act: "index"
-        }
-      }
-    );
-
-    // 春夏新品推荐
-    this.recommend = datas.slice(1).map(item => {
-      return item.goods;
-    });
-    console.log(this.recommend);
-
     // 发送请求拿到轮播图
     let { data: { data: { config } } } = await this.$axios.get(
       "http://cmsjapi.dataoke.com/api/category/product/model-detail-by-model-id-new",
@@ -116,25 +72,46 @@ export default {
         }
       }
     );
-
-    // console.log("config", config);
-
     //  轮播图
-    this.adlist = config.map(item => {
+    this.adlist = config.slice(1).map(item => {
       return item.pic;
     });
-    // console.log("dalist", this.adlist);
 
-    // this.$axios.post(
-    //     "https://m.hao24.com/index/user_survey.do?_=1570420765227"
-    //   )
-    //   .then(res => {
-    //     this.postcontent = res.data;
-    //     console.log(res);
-    //   })
-    //   .catch(err => {
-    //     console.log(err);
-    //   });
+    // 发送请求拿到小圆图
+    let { data: { data: { config: { data} } } } = await this.$axios.get(
+      "https://cmsjapi.dataoke.com/api/category/product/model-detail-by-model-id-new",
+      {
+        params: {
+          entityId: "4",
+          modelId: "11408",
+          proModelId: "2",
+          source: "3",
+          version: "v1"
+        }
+      }
+    );
+    // 提取小图数据
+    this.smallpic = data.map(item => {
+      return {
+        txt: item.name,
+        img: item.address
+      };
+    });
+
+   // 请求数据拿商品
+    let { data: { datas } } = await this.$axios.get(
+      "https://www.nanshig.com/mobile/index.php",
+      {
+        params: {
+          act: "index"
+        }
+      }
+    );
+
+    // 春夏新品推荐
+    this.recommend = datas.slice(1).map(item => {
+      return item.goods;
+    });
   }
 };
 </script>
@@ -142,7 +119,7 @@ export default {
 <style lang="scss" scoped>
 .smallbox {
   display: flex;
-  margin: 20px 0;
+  margin: 0.266667rem 0;
 
   dl {
     flex: 18%;
@@ -171,19 +148,19 @@ export default {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 0.133333rem;
 
   li {
     width: 48%;
     display: flex;
     flex-direction: column;
-    height: 250px;
-    margin-bottom: 18px;
-    margin-top: 10px;
+    height: 200px;
+    margin-bottom: 0.24rem;
+    margin-top: 0.133333rem;
 
     .tit {
-      font-size: 14px;
-      margin: 8px;
+      font-size: .213333rem;
+      margin: 0.106667rem;
       width: 95%;
       height: 45px;
       overflow: hidden;
@@ -194,11 +171,11 @@ export default {
     }
     .el-image {
       width: 100%;
-      height: 200px;
+      height: 2.666667rem;
     }
     .price {
       del {
-        font-size: 14px;
+        font-size: 0.186667rem;
         color: rgba(22, 21, 21, 0.226);
         &::before {
           content: "￥";
@@ -206,8 +183,8 @@ export default {
       }
 
       span {
-        margin-right: 10px;
-        font-size: 18px;
+        margin-right: 0.133333rem;
+        font-size: .24rem;
         color: red;
         font-weight: bold;
 

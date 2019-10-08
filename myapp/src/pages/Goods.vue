@@ -24,8 +24,7 @@
             height="auto">
             <li v-for="item in goodsInfo.goods_commend_list"
             :key="item.goods_id"
-            @click="goto(item.goods_id)
-             "
+            @click="goto(item.goods_id)"
             >
                 <el-image 
                 :src="item.goods_image_url"
@@ -43,26 +42,18 @@ export default {
     return {
       num: 1,
       id: "",
-      goodsInfo: {}
+      goodsInfo: {},
     };
   },
-  watch: {
-    //   第一种用户watch监听id的改变
-    //   $route:function(val,oldVal){
-    //       if(val.params.id != oldVal.params.id){
-    //           this.getData(val.params.id);
-    //       }
-    //   }
-  },
   created() {
-    // console.log("goods", this.$route);
+
     let { id } = this.$route.params;
     this.getData(id);
   },
 
   // 路由守卫监听更新
   beforeRouteUpdate(to, from, next) {
-    console.log("beforeRouteUpdate:", to, from);
+    // console.log("beforeRouteUpdate:", to, from);
     if (to.params.id != from.params.id) {
       this.getData(to.params.id);
     }

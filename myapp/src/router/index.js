@@ -34,7 +34,10 @@ let router = new VueRouter({
         {
             name: 'cart',
             path: '/cart',
-            component: Cart
+            component: Cart,
+            meta: {
+                requiresAuth: true
+            }
         },
         {
             name: 'discover',
@@ -51,7 +54,10 @@ let router = new VueRouter({
         {
             name: 'mine',
             path: '/mine',
-            component: Mine
+            component: Mine,
+            meta: {
+                requiresAuth: true
+            }
         },
         {
             path: '/reg',
@@ -70,9 +76,33 @@ let router = new VueRouter({
             redirect: '/404'
         }
     ]
+});
 
+// 设置全局路由守卫，不登录不能进入购物车和我的页面
+router.beforeEach(function (to, from, next) {
+
+    // 判断是否需要鉴权
+    if (to.meta.requiresAuth) {
+        let requiresAuth = localStorage.getItem('Authorization');
+        // 有鉴权
+        if (Authorization) {
+            next()
+        } else {
+            // 需要鉴权但是没有，先跳登录页
+            router.push({
+                path: '/login',
+                query: {
+                    // 传入上一个历史页面，到时候登录后就能直接调回上个页面
+                    targetUrl: to.fullPath
+                }
+            })
+        }
+    } else {
+        next();
+    }
 
 })
+
 
 // 5.在组件中使用VueRouter
 export default router;

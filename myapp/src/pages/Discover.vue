@@ -81,7 +81,7 @@ export default {
   margin-bottom: 10px;
 
   li {
-    width: 20%;
+    width: 25%;
     display: flex;
     flex-direction: column;
     height: 100px;
