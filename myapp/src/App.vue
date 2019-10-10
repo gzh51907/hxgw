@@ -3,10 +3,11 @@
     <el-container id="myApp">
       <el-header style="height: auto;">
       <div class="top">
-        <i class="fl">  
+        <i class="fl" v-if="!currentUser">  
             <el-button type="text" @click="goto('/reg')" style="line-height:0px;">注册 </el-button>
            <el-button type="text" @click="goto('/login')" style="line-height:0px;margin:0;">登录</el-button>
         </i>
+         <el-button type="text" @click="logout" v-else>退出</el-button>
         <div class="searchbox">
           <i class="el-icon-search" ></i>
            <input type="text" class="search" placeholder="请输入内容">
@@ -18,7 +19,12 @@
        <el-col :span="18">
           <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect" router>
             <el-menu-item :index="item.path" v-for="item in menus" :key="item.name">
-              {{item.text}}
+                <el-badge :value="cartlength" class="item" v-if="item.name==='cart'" style="line-height:30px">
+                  {{item.text}}
+                </el-badge>
+                <template v-else>
+                  {{item.text}}
+                </template>
             </el-menu-item>
           </el-menu>
         </el-col>
@@ -67,13 +73,25 @@ export default {
     },
     goto(path) {
       this.$router.push(path);
+    },
+    logout() {
+      this.$store.commit('logout');
+    }
+  },
+   computed:{
+    cartlength(){
+      return this.$store.getters.cartlength
+    },
+    currentUser(){
+      return this.$store.state.common.user
     }
   },
   created() {
+    //获取url地址参数
     this.activeIndex = this.$route.path;
+    this.$store.dispatch('checkLogin');
   },
-  components: {},
-
+  components: {}
 };
 </script>
 

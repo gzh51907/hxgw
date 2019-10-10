@@ -112,6 +112,7 @@ export default {
     this.recommend = datas.slice(1).map(item => {
       return item.goods;
     });
+
   }
 };
 </script>

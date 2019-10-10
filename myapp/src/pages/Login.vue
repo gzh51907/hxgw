@@ -26,6 +26,7 @@
     </div>
 </template>
 <script>
+
 export default {
   data() {
     return {
@@ -51,7 +52,7 @@ export default {
       this.$refs.loginForm.validate(async valid => {
         if (valid) {
           // 发起ajax请求，等待服务器返回结果
-          // 根据服务器返回结果：成功->跳到“我的”
+          // 根据服务器返回结果：成功->跳到“我的/上个页面”
           let { username,password,mdl } = this.loginForm;
         
           let {data} = await this.$axios.get("http://localhost:1907/user/login",
@@ -62,17 +63,16 @@ export default {
               mdl
             }
             });
-            console.log("data:", data);
-
+            // 后台返回成功数据code=1 时的操作
             if(data.code === 1){
               let { targetUrl } = this.$route.query;
               console.log('targetUrl:',targetUrl);
+              this.$store.commit('login',{username,Authorization:data.data});
+
               this.$router.replace({
                 path: targetUrl || "/mine"
               });
-
-              // 把token写入localstorage
-              localStorage.setItem('Authorization',data.data);
+      
             }else{
               alert('用户名或者密码不正确！')
             }

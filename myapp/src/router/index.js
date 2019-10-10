@@ -16,6 +16,7 @@ import NotFound from '../pages/NotFound.vue';
 import Discover from '../pages/Discover.vue';
 import Mine from '../pages/Mine.vue';
 import Goods from '../pages/Goods.vue';
+import store from '../store';
 
 // 3. 实例化router并配置参数
 let router = new VueRouter({
@@ -79,14 +80,25 @@ let router = new VueRouter({
 });
 
 // 设置全局路由守卫，不登录不能进入购物车和我的页面
-router.beforeEach(function (to, from, next) {
+router.beforeEach(async function (to, from, next) {
 
     // 判断是否需要鉴权
     if (to.meta.requiresAuth) {
-        let requiresAuth = localStorage.getItem('Authorization');
+        let user = localStorage.getItem('user');
         // 有鉴权
-        if (Authorization) {
-            next()
+        if (user) {
+            let res = await store.dispatch('checkLogin');
+            console.log('res:', res);
+            if (res === 400) {
+                next({
+                    path: '/login',
+                    query: {
+                        targetUrl: to.fullPath
+                    }
+                });
+            } else {
+                next();
+            }
         } else {
             // 需要鉴权但是没有，先跳登录页
             router.push({
@@ -100,9 +112,8 @@ router.beforeEach(function (to, from, next) {
     } else {
         next();
     }
+});
 
-})
-
-
+// 第四步在 main.js文件中，注入vue实例
 // 5.在组件中使用VueRouter
 export default router;

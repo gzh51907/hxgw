@@ -11,12 +11,11 @@
             <del>{{goodsInfo.goods_marketprice}}</del>
         </p>
         <p>
-          <el-input-number v-model="num" @change="handleChange" :min="1" :max="10" label="描述文字" ></el-input-number>
+          <el-input-number v-model="num"  :min="1" :max="10" label="描述文字" ></el-input-number>
         </p>
-
         <el-button-group>
-            <el-button type="warning" icon="el-icon-shopping-cart-full" @click="gotocar(goodsInfo.goods_id,num)">加入购物车</el-button>
-            <el-button type="danger" icon="el-icon-goods">立即购买</el-button>
+            <el-button type="warning" icon="el-icon-shopping-cart-full" @click="add2cart">加入购物车</el-button>
+            <el-button type="danger" icon="el-icon-goods" @click="buynow">立即购买</el-button>
         </el-button-group>
 
         <h4 class="tuijian">猜你喜欢</h4>
@@ -41,12 +40,10 @@ export default {
   data() {
     return {
       num: 1,
-      id: "",
-      goodsInfo: {},
+      goodsInfo: {}
     };
   },
   created() {
-
     let { id } = this.$route.params;
     this.getData(id);
   },
@@ -56,14 +53,15 @@ export default {
     // console.log("beforeRouteUpdate:", to, from);
     if (to.params.id != from.params.id) {
       this.getData(to.params.id);
+      this.num = 1;
     }
     next();
   },
-
   methods: {
     goto(id) {
       this.$router.push("/goods/" + id);
     },
+    
     async getData(id) {
       let { data: { datas } } = await this.$axios.get(
         "https://www.nanshig.com/mobile/index.php",
@@ -84,13 +82,33 @@ export default {
       };
     },
 
-    // 数量变化
-    handleChange(value) {
-      console.log(value);
-    },
+    // 添加商品，先判断是否已存在
+    add2cart() {
+      let id = this.goodsInfo.goods_id;
+      let currentgoods = this.$store.state.cart.cartlist.filter(
+        item => item.id == id
+      )[0];
+      if (currentgoods) {
+        let num = currentgoods.num + this.num;
+        console.log("num",num)
+        this.$store.commit("changeNum", { id, num });
 
-    gotocar(id, num) {
-      this.$router.push({ name: "cart", params: { id, num } });
+      } else {
+        let goods = {
+          id,
+          title: this.goodsInfo.goods_name,
+          pic: this.goodsInfo.goods_image,
+          price: this.goodsInfo.goods_promotion_price,
+          num: this.num
+        };
+        this.$store.commit("add2cart", goods);
+      }
+    },
+    
+    // 立即购买
+    buynow() {
+      this.add2cart();
+      this.$router.push("/cart");
     }
   }
 };
