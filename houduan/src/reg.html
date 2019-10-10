@@ -1,0 +1,94 @@
+<!--
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-09-19 13:54:32
+ * @LastEditTime: 2019-09-20 08:48:29
+ * @LastEditors: Please set LastEditors
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>注册</title>
+    <link rel="stylesheet" href="./assets/css/bootstrap.css">
+</head>
+
+<body>
+    <div class="container-fluid">
+        <h1>免费注册</h1>
+        <div class="form-group mt-5">
+            <label for="username">用户名：</label>
+            <input type="text" id="username" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="password">密码：</label>
+            <input type="password" id="password" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">确认密码：</label>
+            <input type="password" id="confirmPassword" class="form-control">
+            <span class="help-block" style="display:none">两次输入密码不一致</span>
+        </div>
+        <button class="btn btn-success" id="btnReg">注册</button>
+    </div>
+
+</body>
+
+</html>
+<script>
+    let username = document.querySelector('#username');
+    let password = document.querySelector('#password');
+    let confirmPassword = document.querySelector('#confirmPassword');
+    let btnReg = document.querySelector('#btnReg');
+    let helpBlock = confirmPassword.nextElementSibling;
+    let confirmPasswordParent = confirmPassword.parentElement;
+
+    // 用户名失去焦点的时候判断数据库是否存在，存在就不能注册
+    username.onblur = function () {
+        let name = username.value;
+
+        let xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+            let res = JSON.parse(xhr.responseText);
+            if (res.code === 1) {
+                username.parentElement.classList.remove('has-error')
+                username.parentElement.classList.add('has-success')
+            } else if (res.code === 0) {
+                username.parentElement.classList.remove('has-success')
+                username.parentElement.classList.add('has-error')
+            }
+        }
+        xhr.open('get', '/user/check?username=' + name, true);
+        xhr.send()
+    }
+
+    // 点击注册，判断密码是否一致，一致就存到数据库
+
+    btnReg.onclick = () => {
+        let name = username.value;
+        let psw1 = password.value;
+        let psw2 = confirmPassword.value;
+
+        if (psw1 != psw2) {
+            helpBlock.style.display = 'block';
+            confirmPasswordParent.classList.add('has-error')
+        } else {
+            helpBlock.style.display = 'none';
+            confirmPasswordParent.classList.remove('has-error')
+        }
+        let xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+            console.log(xhr.responseText);
+        }
+        // console.log(name, psw1);
+        // 发送post请求
+        xhr.open('post', '/user/reg', true);
+
+        // 修改请求，设置请求头
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send(`username=${name}&password=${psw1}`);
+    }
+</script>

@@ -1,0 +1,86 @@
+<!--
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-09-19 17:52:31
+ * @LastEditTime: 2019-09-20 19:22:26
+ * @LastEditors: Please set LastEditors
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>登录</title>
+    <link rel="stylesheet" href="./assets/css/bootstrap.css">
+</head>
+
+<body>
+    <div class="container-fluid">
+        <h1>用户登录</h1>
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" class="form-control" id="username" placeholder="请输入用户名">
+        </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" class="form-control" id="password" placeholder="Password">
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" id="mdl"> 7天免登陆
+            </label>
+        </div>
+        <button type="submit" class="btn btn-success" id="btnLogin">登录</button>
+    </div>
+</body>
+
+</html>
+<script>
+    let username = document.querySelector('#username');
+    let password = document.querySelector('#password');
+    let btnLogin = document.querySelector('#btnLogin');
+    let mdl = document.querySelector('#mdl');
+
+    //获取本地保存的Token                                                          
+    let Authorization = localStorage.getItem('Authorization');
+    if (Authorization) {
+        // 拿到后发给后端校验
+        let xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+            let res = JSON.parse(xhr.responseText);
+            if (res.code === 1) {
+                console.log('有号可登录');
+                location.href = "/index.html";
+            }
+        }
+        xhr.open('get', '/verify', true);
+        xhr.setRequestHeader('Authorization', Authorization);
+        xhr.send();
+    }
+
+    // 点击登录的时候判断数据库是否存在，不存在就不能登录
+    btnLogin.onclick = () => {
+        let name = username.value;
+        let psw = password.value;
+
+        let xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+            let res = JSON.parse(xhr.responseText);
+            console.log(res);
+            if (res.code === 1) {
+                localStorage.setItem('Authorization', res.data);
+                location.href = "/index.html";
+            } else if (res.code === 0) {
+                alert('用户名或密码错误');
+            }
+        }
+        let params = `username=${name}&password=${psw}`
+        if (mdl.checked) {
+            params += `&mdl=1`
+        }
+        xhr.open('get', `/user/login?${params}`, true);
+        xhr.send();
+    }
+</script>
